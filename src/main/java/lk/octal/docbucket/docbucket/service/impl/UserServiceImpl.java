@@ -7,12 +7,20 @@
 
 package lk.octal.docbucket.docbucket.service.impl;
 
+import lk.octal.docbucket.docbucket.dto.LoginDto;
 import lk.octal.docbucket.docbucket.dto.UserDto;
 import lk.octal.docbucket.docbucket.entity.User;
 import lk.octal.docbucket.docbucket.repo.UserRepo;
 import lk.octal.docbucket.docbucket.service.UserService;
+import lk.octal.docbucket.docbucket.service.auth.JwtService;
 import lk.octal.docbucket.docbucket.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,11 +35,28 @@ public class UserServiceImpl implements UserService {
     private UserRepo userRepo;
     @Autowired
     private Converter converter;
+    @Autowired
+    @Lazy
+    private AuthenticationProvider authenticationProvider;
+    @Autowired
+    private JwtService jwtService;
+
     @Override
     public void register(UserDto userDto) {
         if(userRepo.existsByUsername(userDto.getUsername()))
             throw new RuntimeException(userDto.getUsername()+" is already exists..!!");
         userRepo.save(converter.userDtoToEntity(userDto));
+    }
+
+    @Override
+    public String login(LoginDto loginDto) {
+        AuthenticationManager authenticationManager = new ProviderManager(authenticationProvider);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.username(),loginDto.password()));
+        if(authentication.isAuthenticated()){
+            return jwtService.generateToken(loadUserByUsername(loginDto.username()));
+        }
+        throw new RuntimeException("Bad Request..!!");
     }
 
     @Override

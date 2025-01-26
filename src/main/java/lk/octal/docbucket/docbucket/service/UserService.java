@@ -7,9 +7,11 @@
 
 package lk.octal.docbucket.docbucket.service;
 
+import lk.octal.docbucket.docbucket.dto.LoginDto;
 import lk.octal.docbucket.docbucket.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
     void register(UserDto userDto);
+    String login(LoginDto loginDto);
 }

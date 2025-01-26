@@ -7,6 +7,7 @@
 
 package lk.octal.docbucket.docbucket.controller;
 
+import lk.octal.docbucket.docbucket.dto.LoginDto;
 import lk.octal.docbucket.docbucket.dto.UserDto;
 import lk.octal.docbucket.docbucket.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,15 @@ public class UserController {
         try{
             userService.register(userDto);
             return new ResponseEntity<>(userDto.getUsername()+" user registered..!!",HttpStatus.CREATED);
+        }catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
+        try{
+            return new ResponseEntity<>(userService.login(loginDto),HttpStatus.CREATED);
         }catch (Exception exception){
             return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
